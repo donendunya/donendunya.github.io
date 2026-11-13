@@ -1,7 +1,7 @@
 /* Dönen Dünya çevrimdışı katmanı. Önce ağ (yeni sürüm hemen gelir), ağ yoksa son kaydedilen kopya.
-   Yalnız bu klasörün dosyaları; başka adrese dokunmaz. Sürüm: b8087624de5d */
+   Yalnız bu klasörün dosyaları; başka adrese dokunmaz. Sürüm: 0737c5900d55 */
 const ON = 'donen-dunya:' + self.registration.scope + ':';   // yalnız bu oyunun, bu klasördeki önbelleği
-const SURUM = ON + 'b8087624de5d';
+const SURUM = ON + '0737c5900d55';
 const DOSYALAR = ['index.html', 'manifest.webmanifest', 'ikon-192.png', 'ikon-512.png', 'ikon-maskable-512.png', 'apple-touch-icon.png'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(SURUM).then(c => c.addAll(DOSYALAR)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(L => Promise.all(L.filter(k => k.startsWith(ON) && k !== SURUM).map(k => caches.delete(k)))).then(() => self.clients.claim())); });
