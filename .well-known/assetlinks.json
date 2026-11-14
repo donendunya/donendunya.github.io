@@ -1,0 +1,8 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "com.donendunya.game",
+    "sha256_cert_fingerprints": ["4A:95:E7:D3:CC:25:98:83:27:28:7E:2C:5A:3D:E0:0A:6D:35:70:8C:85:CD:54:A7:9D:19:5C:39:E6:2F:B4:1B"]
+  }
+}]
