@@ -1,13 +1,25 @@
-/* Dönen Dünya çevrimdışı katmanı. Önce ağ (yeni sürüm hemen gelir), ağ yoksa son kaydedilen kopya.
-   Yalnız bu klasörün dosyaları; başka adrese dokunmaz. Sürüm: 0737c5900d55 */
-const ON = 'donen-dunya:' + self.registration.scope + ':';   // yalnız bu oyunun, bu klasördeki önbelleği
-const SURUM = ON + '0737c5900d55';
-const DOSYALAR = ['index.html', 'manifest.webmanifest', 'ikon-192.png', 'ikon-512.png', 'ikon-maskable-512.png', 'apple-touch-icon.png'];
-self.addEventListener('install', e => { e.waitUntil(caches.open(SURUM).then(c => c.addAll(DOSYALAR)).then(() => self.skipWaiting())); });
-self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(L => Promise.all(L.filter(k => k.startsWith(ON) && k !== SURUM).map(k => caches.delete(k)))).then(() => self.clients.claim())); });
-self.addEventListener('fetch', e => {
-  const r = e.request; if (r.method !== 'GET' || new URL(r.url).origin !== location.origin) return;
-  const anahtar = r.mode === 'navigate' ? 'index.html' : r;
-  e.respondWith(fetch(r).then(y => { if (y.ok) { const k = y.clone(); caches.open(SURUM).then(c => c.put(anahtar, k)); } return y; })
-    .catch(() => caches.open(SURUM).then(c => c.match(anahtar, { ignoreSearch: true })).then(y => y || Response.error())));
+/* Dönen Dünya: scoped offline cache. Privacy and game navigations use separate keys. */
+const PREFIX = 'donen-dunya:' + self.registration.scope + ':';
+const VERSION = PREFIX + 'privacy-20261116-1';
+const FILES = ['index.html','privacy.html','manifest.webmanifest','ikon-192.png','ikon-512.png','ikon-maskable-512.png','apple-touch-icon.png'];
+self.addEventListener('install', event => {
+  event.waitUntil(caches.open(VERSION).then(cache => cache.addAll(FILES)).then(() => self.skipWaiting()));
+});
+self.addEventListener('activate', event => {
+  event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(key => key.startsWith(PREFIX) && key !== VERSION).map(key => caches.delete(key)))).then(() => self.clients.claim()));
+});
+self.addEventListener('fetch', event => {
+  const request = event.request;
+  const url = new URL(request.url);
+  const scope = new URL(self.registration.scope);
+  if (request.method !== 'GET' || url.origin !== scope.origin || !url.pathname.startsWith(scope.pathname)) return;
+  const isGame = request.mode === 'navigate' && (url.pathname === scope.pathname || url.pathname === new URL('index.html',scope).pathname);
+  const key = isGame ? new URL('index.html',scope).href : request;
+  event.respondWith(fetch(request).then(response => {
+    if (response.ok) {
+      const copy = response.clone();
+      event.waitUntil(caches.open(VERSION).then(cache => cache.put(key,copy)).catch(() => {}));
+    }
+    return response;
+  }).catch(() => caches.open(VERSION).then(cache => cache.match(key,{ignoreSearch:true})).then(response => response || Response.error())));
 });

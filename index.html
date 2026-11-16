@@ -586,8 +586,20 @@ window.DD_DILLER={"tr": {"_dil": "tr", "_ad": "Türkçe", "_yon": "ltr", "d.buz"
     + (titDestek ? '' : '<p class="dd-not" id="dd-tit-not">Bu cihaz titreşimi desteklemiyor.</p>')
     + '<div id="dd-dil" role="group"><span data-dd-dil-yok></span>'
     + (window.DD_DIL ? DD_DIL.diller.map(x => '<button type="button" data-dd-dil-yok data-k="' + x.kod + '" lang="' + x.kod + '">' + x.ad + '</button>').join('') : '') + '</div>'
+    + '<a id="dd-privacy" data-dd-dil-yok href="privacy.html#tr" target="_blank" rel="noopener" style="display:block;text-align:center;color:#f7ecd0;padding:12px 8px;margin-top:8px;text-decoration:underline">Gizlilik Politikası</a>'
     + '<button type="button" id="dd-sifirla" class="dd-tehlike">İlerlemeyi sıfırla</button></div>';
   document.body.appendChild(ayar);
+  // Privacy access only; no gameplay or storage changes.
+  const gizlilikYaz = () => {
+    const k = window.DD_DIL ? DD_DIL.kod : 'tr';
+    const ad = {tr:'Gizlilik Politikası',en:'Privacy Policy',de:'Datenschutzerklärung',es:'Política de privacidad',ar:'سياسة الخصوصية'};
+    const a = document.getElementById('dd-privacy');
+    a.textContent = ad[k] || ad.en;
+    a.href = 'privacy.html#' + (ad[k] ? k : 'en');
+  };
+  document.addEventListener('dd-dil', gizlilikYaz);
+  gizlilikYaz();
+
   const sesOku = () => { try { return JSON.parse(oku('donen-dunya-ses') || '{}') || {}; } catch (e) { return {}; } };
   const durum = { sfx: () => sesOku().sfx !== false, mus: () => sesOku().mus !== false, tit: () => titDestek && oku('dd-titresim') !== '0' };
   const ayarYaz = () => {
